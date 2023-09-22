@@ -37,48 +37,6 @@ class MLP(torch.nn.Module):
         return x
 
 
-class ListATT(torch.nn.Module):
-    def __init__(self, fea_dim, num_fea, dropout, att_dropout, adaptive=True):
-        super(ListATT, self).__init__()
-
-        self.dropout = torch.nn.Dropout(dropout)
-        self.att_dropout = torch.nn.Dropout(att_dropout)
-
-        self.E = MLP(fea_dim * num_fea, fea_dim, fea_dim, 3, dropout)
-        self.s = Linear(2 * fea_dim, 1)
-
-        self.act = torch.nn.Sigmoid()
-        self.adaptive = adaptive
-
-    def reset_parameters(self):
-        self.E.reset_parameters()
-        self.s.reset_parameters()
-
-    def att_scores(self, fea_list, mean_list):
-        # cat_vector = torch.cat(fea_list, dim=1) if self.adaptive else torch.cat(mean_list, dim=1)
-        # E = self.E(cat_vector)
-
-        att_list = fea_list if self.adaptive else mean_list
-        cat_vector = torch.cat(att_list, dim=1)
-        E = self.E(cat_vector)
-
-        att_scores = [self.act(self.s(torch.cat([E, fea], dim=1))).view(-1, 1) for fea in att_list]
-        att_scores = torch.cat(att_scores, dim=1)
-        att_scores = F.softmax(att_scores - 0.5, dim=1)
-
-        return att_scores
-
-    def forward(self, fea_list, mean_list):
-        att_scores = self.att_scores(fea_list, mean_list)
-
-        att_out = self.att_dropout(att_scores[:, 0].view(-1, 1)) * self.dropout(fea_list[0])
-
-        for i in range(1, len(fea_list)):
-            att_out += self.att_dropout(att_scores[:, i].view(-1, 1)) * self.dropout(fea_list[i])
-
-        return att_out
-
-
 class MH_ListAtt(torch.nn.Module):
     def __init__(self, fea_dim, num_fea, num_heads, dropout, att_dropout, adaptive=True):
         super(MH_ListAtt, self).__init__()
@@ -142,8 +100,6 @@ class MH_ListAtt(torch.nn.Module):
 class AFGNN(torch.nn.Module):
     def __init__(self, fea_dim, num_fea, num_heads, att_dropout, hid_dim, out_dim, num_layers, dropout, adaptive=True):
         super(AFGNN, self).__init__()
-
-        # self.att = ListATT(fea_dim, num_fea, dropout, att_dropout, adaptive)
 
         self.att = MH_ListAtt(fea_dim, num_fea, num_heads, dropout, att_dropout, adaptive)
         self.pred = MLP(fea_dim, hid_dim, out_dim, num_layers, dropout)
