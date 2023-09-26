@@ -45,8 +45,7 @@ def main():
 
     fea_list = get_fea_list(data, args.kl, args.km, args.kh)
 
-    model = AFGNN(data.num_features, len(fea_list), args.num_heads, args.att_dropout, args.hid_dim,
-                  dataset.num_classes, args.num_layers, args.dropout, args.adaptive).to(device)
+    model = AFGNN(data.num_features, len(fea_list), args.num_heads, args.att_dropout, args.hid_dim, dataset.num_classes, args.num_layers, args.dropout, args.adaptive).to(device)
 
     run_experiments(args, model, masks, fea_list, data.y, device, args.save_scores)
     print(args)
