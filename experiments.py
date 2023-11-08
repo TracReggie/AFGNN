@@ -69,9 +69,7 @@ def run_experiments(args, model, masks, fea_list, data_y, device, save_scores=Fa
 
         mean_list = [(torch.mean(fea, dim=0)).unsqueeze(0) for fea in fea_list]
         mean_list = [fea.to(device) for fea in mean_list]
-
-        best_val_acc = 0.
-        best_test_acc = 0.
+        
         for epoch in range(1, 1 + args.epochs):
             loss = train(train_loader, fea_list, mean_list, data_y, model, optimizer1, device)
             print(f'Run: {run + 1:02d}, Epoch: {epoch:02d}, Loss: {loss:.4f}')
