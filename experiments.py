@@ -62,7 +62,6 @@ def run_experiments(args, model, masks, fea_list, data_y, device, save_scores=Fa
         model.reset_parameters()
 
         optimizer1 = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-        optimizer2 = torch.optim.SGD(model.parameters(), lr=0.001)
 
         train_loader = data_loader(masks[0], args.batch_size, shuffle=True)
         val_loader = data_loader(masks[1], args.batch_size, shuffle=False)
@@ -82,28 +81,12 @@ def run_experiments(args, model, masks, fea_list, data_y, device, save_scores=Fa
                 val_acc = test(fea_list, mean_list, data_y, val_loader, model, device)
                 test_acc = test(fea_list, mean_list, data_y, test_loader, model, device)
                 print(f'Train: {train_acc:.4f}, Val: {val_acc:.4f}, Test: {test_acc:.4f}')
-                if val_acc > best_val_acc and test_acc > best_test_acc:
-                    best_val_acc = val_acc
-                    best_test_acc = test_acc
-                    torch.save(model, f'./{args.save_name}.pt')
-
-        model = torch.load(f'./{args.save_name}.pt').to(device)
-        for epoch in range(1 + args.epochs, 51 + args.epochs):
-            loss = train(train_loader, fea_list, mean_list, data_y, model, optimizer2, device)
-            print(f'Run: {run + 1:02d}, Epoch: {epoch:02d}, Loss: {loss:.4f}')
-
-            if epoch % args.eval_steps == 0:
-                train_acc = test(fea_list, mean_list, data_y, train_loader, model, device)
-                val_acc = test(fea_list, mean_list, data_y, val_loader, model, device)
-                test_acc = test(fea_list, mean_list, data_y, test_loader, model, device)
-                print(f'Train: {train_acc:.4f}, Val: {val_acc:.4f}, Test: {test_acc:.4f}')
                 result = train_acc, val_acc, test_acc
                 logger.add_result(run, result)
-
+        
         if save_scores:
             torch.save(attention_scores(fea_list, mean_list, model, device), f'scores_{run+1}.pt')
 
         logger.print_statistics(run)
-
     logger.print_statistics()
     print('============================================')
