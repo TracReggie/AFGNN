@@ -11,16 +11,13 @@ def GCN_adj(edge_index, self_loops=True):
     deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
 
     adj_sym = deg_inv_sqrt.view(-1, 1) * adj * deg_inv_sqrt.view(1, -1)
-    adj_rw = deg_inv_sqrt.view(-1, 1) * deg_inv_sqrt.view(-1, 1) * adj
-
     adj_sym = adj_sym.to_scipy(layout='csr')
-    adj_rw = adj_rw.to_scipy(layout='csr')
 
-    return adj_sym, adj_rw
+    return adj_sym
 
 
 def get_fea_list(data, kl, km, kh, pl=1.5, al=1, pm=-1.2, am=1, ph=1.5, ah=0.5, res=True):
-    adj_sym, _ = GCN_adj(data.edge_index)
+    adj_sym = GCN_adj(data.edge_index)
 
     fea_list = [data.x] if res else []
 
