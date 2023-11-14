@@ -2,8 +2,7 @@ import random
 import numpy as np
 import os
 import torch
-from torch_geometric.loader import DataLoader
-from torch_geometric.utils import mask_to_index
+
 
 
 class Logger(object):
@@ -63,10 +62,3 @@ def set_seed(seed=3407):
     torch.cuda.manual_seed_all(seed)  # torch的GPU随机性，为所有GPU设置随机种子
     torch.backends.cudnn.benchmark = False  # if benchmark=True, deterministic will be False
     torch.backends.cudnn.deterministic = True  # 选择确定性算法
-
-
-def data_loader(mask, batch_size, shuffle):
-    idx = mask_to_index(mask)
-    loader = DataLoader(idx, batch_size=batch_size, shuffle=shuffle)
-
-    return loader
