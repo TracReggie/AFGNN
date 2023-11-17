@@ -4,7 +4,6 @@ import os
 import torch
 
 
-
 class Logger(object):
     def __init__(self, runs, info=None):
         self.info = info
@@ -19,38 +18,41 @@ class Logger(object):
         if run is not None:
             result = 100 * torch.tensor(self.results[run])
             max_val = result[:, 1].max()
-            mask = result[:, 1] == max_val
+            mask = (result[:, 1] == max_val)
             print(f'Run {run + 1:02d}:')
-            print(f'Highest Train: {result[:, 0].max():.2f}')
-            print(f'Highest Test: {result[:, 2].max():.2f}')
             print(f'Highest Valid: {max_val:.2f}')
+            print(f'Highest Train: {result[:, 0].max():.2f}')
             print(f'Final Train: {torch.max(result[:, 0][mask]):.2f}')
+            print(f'Highest Test: {result[:, 2].max():.2f}')
             print(f'Final Test: {torch.max(result[:, 2][mask]):.2f}')
-
         else:
             results = 100 * torch.tensor(self.results)
 
             best_results = []
             for result in results:
                 max_train = result[:, 0].max().item()
+                max_test = result[:, 2].max().item()
                 max_val = result[:, 1].max().item()
-                mask = result[:, 1] == max_val
+                mask = (result[:, 1] == max_val)
                 final_train = torch.max(result[:, 0][mask]).item()
                 final_test = torch.max(result[:, 2][mask]).item()
-                best_results.append((max_train, max_val, final_train, final_test))
+                best_results.append((max_train, max_test, max_val, final_train, final_test))
 
             best_result = torch.tensor(best_results)
-
             print('============================================')
             print(f'All runs:')
-            result = best_result[:, 0]
-            print(f'Highest Train: {result.mean():.2f} ± {result.std():.2f}')
-            result = best_result[:, 1]
-            print(f'Highest Valid: {result.mean():.2f} ± {result.std():.2f}')
             result = best_result[:, 2]
-            print(f'Final Train: {result.mean():.2f} ± {result.std():.2f}')
+            print(f'Highest Valid: {result.mean():.2f}±{result.std():.2f}')
+            result = best_result[:, 0]
+            print(f'Highest Train: {result.mean():.2f}±{result.std():.2f}')
             result = best_result[:, 3]
-            print(f'Final Test: {result.mean():.2f} ± {result.std():.2f}')
+            print(f'Final Train: {result.mean():.2f}±{result.std():.2f}')
+            result = best_result[:, 1]
+            print(f'Highest Test: {result.mean():.2f}±{result.std():.2f}')
+            result = best_result[:, 4]
+            print(f'Final Test: {result.mean():.2f}±{result.std():.2f}')
+
+            return result.mean()
 
 
 def set_seed(seed=3407):
