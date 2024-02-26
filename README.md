@@ -22,6 +22,7 @@ Please cite our work if you find it is useful for you:
   date = {2024-01},
   journaltitle = {Neural Networks},
   volume = {169},
-  pages = {1--10}
+  pages = {1--10},
+  doi = {https://doi.org/10.1016/j.neunet.2023.09.042}
 }
 ```
